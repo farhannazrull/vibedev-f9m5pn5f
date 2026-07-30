@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Podcast Queue Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <h1>Podcast Queue</h1>
+      <p class="queue-count" role="status" id="queue-status" aria-live="polite">0 episodes</p>
+    </header>
+
+    <main>
+      <section class="add-section" aria-labelledby="add-heading">
+        <h2 id="add-heading" class="section-heading">Add Episode</h2>
+        <form id="add-form" novalidate>
+          <div class="form-group">
+            <label for="show-name">Show Name</label>
+            <input type="text" id="show-name" required aria-describedby="show-name-error" placeholder="e.g. Radiolab">
+            <p id="show-name-error" class="error-message" role="alert" hidden></p>
+          </div>
+          <div class="form-group">
+            <label for="episode-title">Episode Title</label>
+            <input type="text" id="episode-title" required aria-describedby="episode-title-error" placeholder="e.g. The Universe in a Grain of Sand">
+            <p id="episode-title-error" class="error-message" role="alert" hidden></p>
+          </div>
+          <div class="form-group">
+            <label for="episode-notes">Notes</label>
+            <textarea id="episode-notes" rows="3" aria-describedby="notes-error" placeholder="Why you want to listen..."></textarea>
+            <p id="notes-error" class="error-message" role="alert" hidden></p>
+          </div>
+          <button type="submit" class="btn btn-primary">Add to Queue</button>
+        </form>
+      </section>
+
+      <section class="filter-section" aria-labelledby="filter-heading">
+        <h2 id="filter-heading" class="visually-hidden">Filter Episodes</h2>
+        <fieldset class="filter-group" role="radiogroup" aria-labelledby="filter-heading">
+          <legend class="filter-legend">Show:</legend>
+          <label class="filter-label">
+            <input type="radio" name="filter" value="all" checked>
+            <span class="filter-text">All</span>
+          </label>
+          <label class="filter-label">
+            <input type="radio" name="filter" value="unlistened">
+            <span class="filter-text">Unlistened</span>
+          </label>
+          <label class="filter-label">
+            <input type="radio" name="filter" value="listened">
+            <span class="filter-text">Listened</span>
+          </label>
+        </fieldset>
+      </section>
+
+      <section class="queue-section" aria-labelledby="queue-heading">
+        <h2 id="queue-heading" class="section-heading">Your Queue</h2>
+        <ul id="queue-list" class="queue-list" role="list"></ul>
+        <p id="empty-state" class="empty-state" role="status">No episodes yet. Add one above!</p>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
