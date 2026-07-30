@@ -210,7 +210,45 @@ function showFieldError(inputEl, errorEl, message) {
 }
 
 function render() {
+  var oldMap = {};
+  var cards = queueList.querySelectorAll('.episode-card');
+  cards.forEach(function (card) {
+    oldMap[card.dataset.id] = card.getBoundingClientRect().top;
+  });
+
   renderQueue(episodes, currentFilter, queueList, emptyState, queueStatus);
+
+  var newCards = queueList.querySelectorAll('.episode-card');
+  newCards.forEach(function (card) {
+    var oldTop = oldMap[card.dataset.id];
+    if (oldTop !== undefined) {
+      var newTop = card.getBoundingClientRect().top;
+      var diff = oldTop - newTop;
+      if (diff !== 0) {
+        card.style.transform = 'translateY(' + diff + 'px)';
+        card.style.transition = 'none';
+        requestAnimationFrame(function () {
+          card.style.transition = 'transform 0.25s ease';
+          card.style.transform = '';
+        });
+        card.addEventListener('transitionend', function cleanup() {
+          card.style.transition = '';
+          card.removeEventListener('transitionend', cleanup);
+        });
+      }
+    } else {
+      card.style.opacity = '0';
+      requestAnimationFrame(function () {
+        card.style.transition = 'opacity 0.2s ease';
+        card.style.opacity = '1';
+      });
+      card.addEventListener('transitionend', function cleanup() {
+        card.style.transition = '';
+        card.style.opacity = '';
+        card.removeEventListener('transitionend', cleanup);
+      });
+    }
+  });
 }
 
 function handleSubmit(event) {
