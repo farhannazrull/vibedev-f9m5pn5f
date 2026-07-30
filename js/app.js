@@ -5,6 +5,7 @@
 
 const STORAGE_KEY = 'podcast-queue';
 
+/** @returns {Array} */
 function loadEpisodes() {
   try {
     const data = localStorage.getItem(STORAGE_KEY);
@@ -17,6 +18,7 @@ function loadEpisodes() {
   }
 }
 
+/** @param {Array} episodes */
 function saveEpisodes(episodes) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(episodes));
@@ -25,6 +27,7 @@ function saveEpisodes(episodes) {
   }
 }
 
+/** @param {string} value @returns {string|null} */
 function validateShowName(value) {
   const trimmed = (value || '').trim();
   if (trimmed.length === 0) return 'Show name is required.';
@@ -32,6 +35,7 @@ function validateShowName(value) {
   return null;
 }
 
+/** @param {string} value @returns {string|null} */
 function validateEpisodeTitle(value) {
   const trimmed = (value || '').trim();
   if (trimmed.length === 0) return 'Episode title is required.';
@@ -39,12 +43,14 @@ function validateEpisodeTitle(value) {
   return null;
 }
 
+/** @param {string} value @returns {string|null} */
 function validateNotes(value) {
   const trimmed = (value || '').trim();
   if (trimmed.length > 500) return 'Notes must be 500 characters or fewer.';
   return null;
 }
 
+/** @param {string} showName @param {string} episodeTitle @param {string} notes @returns {Object} */
 function validateForm(showName, episodeTitle, notes) {
   return {
     showName: validateShowName(showName),
@@ -53,6 +59,7 @@ function validateForm(showName, episodeTitle, notes) {
   };
 }
 
+/** @param {string} isoString @returns {string} */
 function formatDate(isoString) {
   if (!isoString) return '';
   const date = new Date(isoString);
@@ -71,12 +78,14 @@ function formatDate(isoString) {
   });
 }
 
+/** @returns {string} */
 function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
 
 /* ── DOM / Rendering ── */
 
+/** @returns {HTMLButtonElement} */
 function createButton(text, className, ariaLabel, dataAction, episodeId) {
   const btn = document.createElement('button');
   btn.className = className;
@@ -87,6 +96,7 @@ function createButton(text, className, ariaLabel, dataAction, episodeId) {
   return btn;
 }
 
+/** @returns {HTMLLIElement} */
 function createEpisodeCard(episode, index, total) {
   const li = document.createElement('li');
   li.className = 'episode-card' + (episode.listened ? ' listened' : '');
@@ -147,6 +157,13 @@ function createEpisodeCard(episode, index, total) {
   return li;
 }
 
+/**
+ * @param {Array} episodes
+ * @param {string} filter
+ * @param {HTMLElement} listEl
+ * @param {HTMLElement} emptyEl
+ * @param {HTMLElement} statusEl
+ */
 function renderQueue(episodes, filter, listEl, emptyEl, statusEl) {
   var filtered;
   if (filter === 'unlistened') {
@@ -193,6 +210,7 @@ var emptyState = document.getElementById('empty-state');
 var queueStatus = document.getElementById('queue-status');
 var filterRadios = document.querySelectorAll('input[name="filter"]');
 
+/** Clear form field errors */
 function clearErrors() {
   [showNameError, episodeTitleError, notesError].forEach(function (el) {
     el.hidden = true;
@@ -203,12 +221,14 @@ function clearErrors() {
   });
 }
 
+/** @param {HTMLElement} inputEl @param {HTMLElement} errorEl @param {string} message */
 function showFieldError(inputEl, errorEl, message) {
   inputEl.classList.add('error');
   errorEl.textContent = message;
   errorEl.hidden = false;
 }
 
+/** Re-render queue with FLIP animation */
 function render() {
   var oldMap = {};
   var cards = queueList.querySelectorAll('.episode-card');
@@ -251,6 +271,7 @@ function render() {
   });
 }
 
+/** @param {Event} event */
 function handleSubmit(event) {
   event.preventDefault();
   clearErrors();
@@ -285,6 +306,7 @@ function handleSubmit(event) {
   showNameInput.focus();
 }
 
+/** Handle filter radio change */
 function handleFilterChange() {
   filterRadios.forEach(function (radio) {
     if (radio.checked) currentFilter = radio.value;
@@ -292,6 +314,7 @@ function handleFilterChange() {
   render();
 }
 
+/** @param {Event} event */
 function handleQueueClick(event) {
   var btn = event.target.closest('button[data-action]');
   if (!btn) return;
@@ -328,6 +351,7 @@ function handleQueueClick(event) {
   render();
 }
 
+/** Bootstrap the app */
 function init() {
   if (document.fonts) {
     document.documentElement.classList.add('fonts-loading');
