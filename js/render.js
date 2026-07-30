@@ -6,7 +6,9 @@
  * @returns {string}
  */
 function formatDate(isoString) {
+  if (!isoString) return '';
   const date = new Date(isoString);
+  if (isNaN(date.getTime())) return '';
   const now = new Date();
   const diffMs = now - date;
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
@@ -59,11 +61,11 @@ function createEpisodeCard(episode, index, total) {
 
   const showEl = document.createElement('div');
   showEl.className = 'episode-show';
-  showEl.textContent = episode.showName;
+  showEl.textContent = episode.showName || 'Untitled Show';
 
   const titleEl = document.createElement('div');
   titleEl.className = 'episode-title';
-  titleEl.textContent = episode.episodeTitle;
+  titleEl.textContent = episode.episodeTitle || 'Untitled Episode';
 
   const notesEl = document.createElement('div');
   notesEl.className = 'episode-notes';
@@ -73,9 +75,11 @@ function createEpisodeCard(episode, index, total) {
     notesEl.style.display = 'none';
   }
 
+  const addedAt = episode.addedAt || '';
+
   const metaEl = document.createElement('div');
   metaEl.className = 'episode-meta';
-  metaEl.textContent = formatDate(episode.addedAt);
+  metaEl.textContent = formatDate(addedAt);
 
   const actionsEl = document.createElement('div');
   actionsEl.className = 'episode-actions';

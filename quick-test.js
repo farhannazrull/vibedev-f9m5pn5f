@@ -23,7 +23,9 @@ function validateNotes(value) {
 }
 
 function formatDate(isoString) {
+  if (!isoString) return '';
   const date = new Date(isoString);
+  if (isNaN(date.getTime())) return '';
   const now = new Date();
   const diffMs = now - date;
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
@@ -100,6 +102,15 @@ test('notes rejects over 500 chars', function () {
 });
 
 /* formatDate */
+test('formatDate returns empty string for null', function () {
+  console.assert(formatDate(null) === '', 'null should return empty');
+});
+test('formatDate returns empty string for undefined', function () {
+  console.assert(formatDate(undefined) === '', 'undefined should return empty');
+});
+test('formatDate returns empty string for invalid date', function () {
+  console.assert(formatDate('not-a-date') === '', 'invalid date should return empty');
+});
 test('formatDate returns "Added today" for today', function () {
   const today = new Date().toISOString();
   console.assert(formatDate(today) === 'Added today', 'today should match');

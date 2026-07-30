@@ -29,8 +29,8 @@ function loadEpisodes() {
 function saveEpisodes(episodes) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(episodes));
-  } catch {
-    /* localStorage full or unavailable — silently ignore */
+  } catch (e) {
+    console.warn('Failed to save episodes to localStorage:', e);
   }
 }
 
