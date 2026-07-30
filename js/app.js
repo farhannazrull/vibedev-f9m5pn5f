@@ -141,11 +141,13 @@ function createEpisodeCard(episode, index, total) {
     episode.id
   );
 
+  const editBtn = createButton('\u270F', 'btn btn-icon edit-btn', 'Edit episode', 'edit', episode.id);
   const deleteBtn = createButton('\u2716', 'btn btn-icon delete-btn', 'Delete episode', 'delete', episode.id);
 
   actionsEl.appendChild(moveUpBtn);
   actionsEl.appendChild(moveDownBtn);
   actionsEl.appendChild(listenBtn);
+  actionsEl.appendChild(editBtn);
   actionsEl.appendChild(deleteBtn);
 
   li.appendChild(showEl);
@@ -165,13 +167,24 @@ function createEpisodeCard(episode, index, total) {
  * @param {HTMLElement} statusEl
  */
 function renderQueue(episodes, filter, listEl, emptyEl, statusEl) {
-  var filtered;
+  var search = searchTerm.toLowerCase().trim();
+  var preFiltered;
   if (filter === 'unlistened') {
-    filtered = episodes.filter(function (e) { return !e.listened; });
+    preFiltered = episodes.filter(function (e) { return !e.listened; });
   } else if (filter === 'listened') {
-    filtered = episodes.filter(function (e) { return e.listened; });
+    preFiltered = episodes.filter(function (e) { return e.listened; });
   } else {
-    filtered = episodes;
+    preFiltered = episodes;
+  }
+
+  var filtered;
+  if (search) {
+    filtered = preFiltered.filter(function (e) {
+      return (e.showName && e.showName.toLowerCase().indexOf(search) !== -1)
+        || (e.episodeTitle && e.episodeTitle.toLowerCase().indexOf(search) !== -1);
+    });
+  } else {
+    filtered = preFiltered;
   }
 
   listEl.innerHTML = '';
@@ -197,6 +210,8 @@ function renderQueue(episodes, filter, listEl, emptyEl, statusEl) {
 
 var episodes = [];
 var currentFilter = 'all';
+var editingId = null;
+var searchTerm = '';
 
 var form = document.getElementById('add-form');
 var showNameInput = document.getElementById('show-name');
@@ -205,10 +220,54 @@ var notesInput = document.getElementById('episode-notes');
 var showNameError = document.getElementById('show-name-error');
 var episodeTitleError = document.getElementById('episode-title-error');
 var notesError = document.getElementById('notes-error');
+var notesCounter = document.getElementById('notes-counter');
+var submitBtn = document.getElementById('submit-btn');
+var cancelBtn = document.getElementById('cancel-btn');
 var queueList = document.getElementById('queue-list');
 var emptyState = document.getElementById('empty-state');
 var queueStatus = document.getElementById('queue-status');
 var filterRadios = document.querySelectorAll('input[name="filter"]');
+var searchInput = document.getElementById('search-input');
+var addHeading = document.getElementById('add-heading');
+
+/** Update character counter for notes */
+function updateCharCounter() {
+  var len = notesInput.value.length;
+  notesCounter.textContent = len + '/500';
+  if (len > 450) {
+    notesCounter.classList.add('near-limit');
+  } else {
+    notesCounter.classList.remove('near-limit');
+  }
+}
+
+/** Start editing an episode */
+function startEditing(id) {
+  var ep = episodes.find(function (e) { return e.id === id; });
+  if (!ep) return;
+  editingId = id;
+  showNameInput.value = ep.showName;
+  episodeTitleInput.value = ep.episodeTitle;
+  notesInput.value = ep.notes || '';
+  submitBtn.textContent = 'Update Episode';
+  cancelBtn.hidden = false;
+  addHeading.dataset.editing = 'true';
+  updateCharCounter();
+  clearErrors();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  showNameInput.focus();
+}
+
+/** Cancel editing and reset form */
+function cancelEditing() {
+  editingId = null;
+  form.reset();
+  submitBtn.textContent = 'Add to Queue';
+  cancelBtn.hidden = true;
+  addHeading.dataset.editing = 'false';
+  updateCharCounter();
+  clearErrors();
+}
 
 /** Clear form field errors */
 function clearErrors() {
@@ -290,20 +349,28 @@ function handleSubmit(event) {
     return;
   }
 
-  var episode = {
-    id: generateId(),
-    showName: showName.trim(),
-    episodeTitle: episodeTitle.trim(),
-    notes: notes.trim(),
-    listened: false,
-    addedAt: new Date().toISOString(),
-  };
-
-  episodes.push(episode);
+  if (editingId) {
+    var target = episodes.find(function (e) { return e.id === editingId; });
+    if (target) {
+      target.showName = showName.trim();
+      target.episodeTitle = episodeTitle.trim();
+      target.notes = notes.trim();
+    }
+    cancelEditing();
+  } else {
+    episodes.push({
+      id: generateId(),
+      showName: showName.trim(),
+      episodeTitle: episodeTitle.trim(),
+      notes: notes.trim(),
+      listened: false,
+      addedAt: new Date().toISOString(),
+    });
+    form.reset();
+    showNameInput.focus();
+  }
   saveEpisodes(episodes);
   render();
-  form.reset();
-  showNameInput.focus();
 }
 
 /** Handle filter radio change */
@@ -328,6 +395,9 @@ function handleQueueClick(event) {
     case 'toggle-listened':
       episodes[index].listened = !episodes[index].listened;
       break;
+    case 'edit':
+      startEditing(id);
+      return;
     case 'delete':
       episodes.splice(index, 1);
       break;
@@ -362,6 +432,15 @@ function init() {
 
   episodes = loadEpisodes();
 
+  notesInput.addEventListener('input', updateCharCounter);
+  searchInput.addEventListener('input', function () {
+    searchTerm = searchInput.value;
+    render();
+  });
+  cancelBtn.addEventListener('click', function () {
+    cancelEditing();
+    render();
+  });
   form.addEventListener('submit', handleSubmit);
 
   filterRadios.forEach(function (radio) {
@@ -370,6 +449,7 @@ function init() {
 
   queueList.addEventListener('click', handleQueueClick);
 
+  updateCharCounter();
   render();
 
   if (episodes.length === 0) {

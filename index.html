@@ -32,10 +32,16 @@
           </div>
           <div class="form-group">
             <label for="episode-notes">Notes</label>
-            <textarea id="episode-notes" rows="3" aria-describedby="notes-error" placeholder="Why you want to listen..."></textarea>
+            <div class="notes-wrapper">
+              <textarea id="episode-notes" rows="3" aria-describedby="notes-error notes-counter" placeholder="Why you want to listen..." maxlength="500"></textarea>
+              <span id="notes-counter" class="char-counter" role="status" aria-live="polite">0/500</span>
+            </div>
             <p id="notes-error" class="error-message" role="alert" hidden></p>
           </div>
-          <button type="submit" class="btn btn-primary">Add to Queue</button>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="submit-btn">Add to Queue</button>
+            <button type="button" class="btn btn-cancel" id="cancel-btn" hidden>Cancel</button>
+          </div>
         </form>
       </section>
 
@@ -56,6 +62,10 @@
             <span class="filter-text">Listened</span>
           </label>
         </fieldset>
+        <div class="search-wrapper">
+          <label for="search-input" class="visually-hidden">Search episodes</label>
+          <input type="search" id="search-input" placeholder="Search by show or title..." autocomplete="off">
+        </div>
       </section>
 
       <section class="queue-section" aria-labelledby="queue-heading">
